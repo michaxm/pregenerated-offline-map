@@ -1,0 +1,12 @@
+{
+    "name": "dataname",
+    "legend": "Hamburg", 
+    "attribution": "de", 
+    "description": "Test", 
+    "template": "", 
+    "center": "10.0200,53.5660,11",
+    "bounds": "9.9200,53.4660,10.1200,53.6660", 
+    "minzoom": "11", 
+    "maxzoom": "15", 
+    "version": "0.1"
+}

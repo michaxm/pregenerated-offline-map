@@ -1,0 +1,14 @@
+{
+    "name": "offline-map",
+    "description": "Displays prerendered (openstreemap) tiles.",
+    "launch_path": "/index.html",
+    "icons":
+    {
+         "128": "/map-icon.png"
+    },
+    "developer":
+    {
+        "": "",
+        "": ""
+    }
+}
