@@ -1,6 +1,6 @@
 function onEachCity(feature, layer) {
-    var popupContent = "<b>Lokalizacja: </b>";
-    var city = "Lokalizacja: ";
+    var popupContent = "<b>Position: </b>";
+    var city = "Position: ";
 
     if (feature.properties && feature.properties.city) {
         popupContent += feature.properties.city;
@@ -9,11 +9,11 @@ function onEachCity(feature, layer) {
     layer.bindPopup(popupContent);
 
     layer.on('mouseover', function (e) {
-        $('#miasto').text(city + feature.properties.city);
+        $('#entry').text(city + feature.properties.city);
     });
 
     layer.on('mouseout', function (e) {
-        $('#miasto').text('');
+        $('#entry').text('');
     });
 }
 
@@ -23,7 +23,7 @@ function onEachLink(feature, layer) {
     if (feature.properties && feature.properties.title) {
         popupContent += feature.properties.title;
         popupContent += "<br>";
-        popupContent += "<b>Opis: </b>";
+        popupContent += "<b>Description: </b>";
         popupContent += feature.properties.description;
     }
 
@@ -31,25 +31,54 @@ function onEachLink(feature, layer) {
 }
 
 window.onload = function init() {
-    $.getJSON("data/tiles/metadata.json", function(data){
-       initMap(data);
+    initData();
+}
+
+function initData() {
+    console.log("Loading data");
+    readMetadata("data/tiles/metadata.json", function(metadata){
+        initMap(metadata);
     });
 }
 
 function initMap(metadata) {
+    var useInlineData = false;
+    console.log("Initializing");
+
     var center = metadata.center.split(",");
     var map = new L.Map("map", {
         center: new L.LatLng(center[1], center[0]),
         zoom: center[2]
     });
-
-    var TopoLayer = L.tileLayer('data/tiles/{z}/{x}/{y}.png', {
-        maxZoom: metadata.maxzoom,
-        minZoom: metadata.minzoom,
+    $('#reload').on('click', function() {
+        map.remove();
+        initData();
     });
-
-    map.addLayer(TopoLayer);
-
+    
+    var baseLayer;
+    if (useInlineData) {
+        baseLayer = new L.tileLayer(
+            'data/tiles/{z}/{x}/{y}.png',
+            makeLayerOptions(metadata)
+        );
+    } else {
+        baseLayer = new L.TileLayer.Functional(function (view) {
+            var filePath = 'data/tiles/{z}/{x}/{y}.png'
+            .replace('{z}', view.zoom)
+            .replace('{y}', view.tile.row)
+            .replace('{x}', view.tile.column);
+            
+            var deferred = $.Deferred();
+            withUrlForFilePath(filePath, function(url) {
+                deferred.resolve(url);
+            })
+            return deferred.promise();
+            
+        }, makeLayerOptions(metadata));
+    }
+    map.addLayer(baseLayer);
+    
+    
     var geojsonMarkerOptions = {
         radius: 6,
         fillColor: "#ff7800",
@@ -100,4 +129,11 @@ function initMap(metadata) {
     });
     
     map.addControl( searchControl );  //inizialize search control
+}
+
+function makeLayerOptions(metadata) {
+    return {
+        maxZoom: metadata.maxzoom,
+        minZoom: metadata.minzoom,
+    };
 }

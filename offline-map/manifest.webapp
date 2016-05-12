@@ -2,13 +2,18 @@
     "name": "offline-map",
     "description": "Displays prerendered (openstreemap) tiles.",
     "launch_path": "/index.html",
-    "icons":
-    {
-         "128": "/map-icon.png"
+    "icons": {
+        "128": "/map-icon.png"
     },
-    "developer":
-    {
-        "": "",
-        "": ""
+    "developer": {
+        "name": "Axel Mannhardt",
+        "url": ""
+    },
+    "type": "privileged",
+    "permissions": {
+        "device-storage:sdcard": {
+            "description": "for reading map data",
+            "access": "readonly"
+        }
     }
 }
