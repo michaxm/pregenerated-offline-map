@@ -4,6 +4,13 @@ function readMetadata(filename, callback) {
     });
 }
 
+function readMapNames(callback) {
+    readFile("sdcard", "data/maps", function(result){
+        callback(JSON.parse(result).folders);
+        // TODO faildsafe errorCallback in order to mapNames ? mapNames else []
+    });
+}
+
 function withUrlForFilePath(filePath, callback) {
     withStorageFile("sdcard", filePath, function () {
         var url = window.URL.createObjectURL(this.result);

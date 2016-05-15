@@ -1,0 +1,12 @@
+{
+    "name": "World",
+    "legend": "World", 
+    "attribution": "de", 
+    "description": "Test", 
+    "template": "", 
+    "center": "0.0000,0.0000,1",
+    "bounds": "-180.0,-85.0,179.0,85.0", 
+    "minzoom": 0,
+    "maxzoom": 2,
+    "version": 0.1
+}

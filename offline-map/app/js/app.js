@@ -31,39 +31,66 @@ function onEachLink(feature, layer) {
 }
 
 window.onload = function init() {
-    initData();
+    initData(null);
 }
 
-function initData() {
-    console.log("Loading data");
-    readMetadata("data/tiles/metadata.json", function(metadata){
-        initMap(metadata);
+function initData(mapSelection) {
+    console.log("Loading data for: "+mapSelection);
+    
+    readMapNames(function(mapNames) {
+        if (mapSelection == null) {
+        // direct access logs an error, but works ...
+        // this is copied workaround - probably really dirty, but right now I don't care
+        $.ajaxSetup({beforeSend: function(xhr){
+                         if (xhr.overrideMimeType)  {
+                             xhr.overrideMimeType("application/json");
+                         }}});
+        $.getJSON("data/World/metadata.json", function(metadata){
+            initMap(metadata, true, mapNames);
+        });
+    } else {
+        readMetadata("data/Hamburg/metadata.json", function(metadata){
+            initMap(metadata, false, mapNames);
+        });
+    }
     });
 }
 
-function initMap(metadata) {
-    var useInlineData = false;
+function initMap(metadata, useInlineData, mapNames) {
     console.log("Initializing");
-
     var center = metadata.center.split(",");
     var map = new L.Map("map", {
         center: new L.LatLng(center[1], center[0]),
         zoom: center[2]
     });
-    $('#reload').on('click', function() {
-        map.remove();
-        initData();
-    });
-    
+    addBaseLayer(map, metadata, useInlineData);
+    var featuresLayer = addMapMarkers(map);
+    addSearchControl(map, featuresLayer);
+    addMapControl(map, mapNames);
+}
+
+function addBaseLayer(map, metadata, useInlineData) {
     var baseLayer;
     if (useInlineData) {
         baseLayer = new L.tileLayer(
-            'data/tiles/{z}/{x}/{y}.png',
+            makeFsPath(metadata),
             makeLayerOptions(metadata)
-        );
+            );
+        /*
+        // debug requested tiles:
+        baseLayer = new L.TileLayer.Functional(function (view) {
+            var filePath = makeFsPath(metadata)
+            .replace('{z}', view.zoom)
+            .replace('{y}', view.tile.row)
+            .replace('{x}', view.tile.column);
+        
+            console.log(filePath);
+            return filePath;
+        });
+            */
     } else {
         baseLayer = new L.TileLayer.Functional(function (view) {
-            var filePath = 'data/tiles/{z}/{x}/{y}.png'
+            var filePath = makeFsPath(metadata)
             .replace('{z}', view.zoom)
             .replace('{y}', view.tile.row)
             .replace('{x}', view.tile.column);
@@ -77,7 +104,51 @@ function initMap(metadata) {
         }, makeLayerOptions(metadata));
     }
     map.addLayer(baseLayer);
+}
+
+function makeFsPath(metadata) {
+    // Shortcut: demand metadata.name == data folder name
+    var mapName = metadata.name;
+    return 'data/'+mapName+'/{z}/{x}/{y}.png';
+}
+
+function makeLayerOptions(metadata) {
+    return {
+        maxZoom: metadata.maxzoom,
+        minZoom: metadata.minzoom,
+    };
+}
+
+function addMapControl(map, mapNames) {
+    $('#reload').on('click', function() {
+        map.remove();
+        initData(null);
+    });
+    $('#world-map').on('click', function() {
+        map.remove();
+        initData(null);
+    });
     
+    $('.map-name').remove();
+    
+    var mapNamesContainer = $('#mapNames');
+    addMapSelector(mapNamesContainer, map, "World", null);
+    
+    mapNames.forEach(function(mapName) {
+        addMapSelector(mapNamesContainer, map, mapName, mapName);
+    });
+}
+
+function addMapSelector(mapNamesContainer, map, mapDisplayName, mapName) {
+    var mapNameSelector = $( '<li class="list-group-item map-name">'+mapDisplayName+'</li>' );
+    mapNamesContainer.append(mapNameSelector);
+    mapNameSelector.on('click', function() {
+            map.remove();
+            initData(mapName);
+        });
+}
+
+function addMapMarkers(map) {
     
     var geojsonMarkerOptions = {
         radius: 6,
@@ -104,6 +175,10 @@ function initMap(metadata) {
         },
         onEachFeature: onEachLink
     });
+    return featuresLayer;
+}
+
+function addSearchControl(map, featuresLayer) {
 
     var searchControl = new L.Control.Search({
         layer: featuresLayer, 
@@ -129,11 +204,4 @@ function initMap(metadata) {
     });
     
     map.addControl( searchControl );  //inizialize search control
-}
-
-function makeLayerOptions(metadata) {
-    return {
-        maxZoom: metadata.maxzoom,
-        minZoom: metadata.minzoom,
-    };
 }
