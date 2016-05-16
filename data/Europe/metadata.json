@@ -1,0 +1,12 @@
+{
+    "name": "Europe",
+    "legend": "Europe", 
+    "attribution": "de", 
+    "description": "Europe", 
+    "template": "", 
+    "center": "10.0,51.0,4",
+    "bounds": "-19.0,20.0,39.0,73.0", 
+    "minzoom": "4",
+    "maxzoom": "6",
+    "version": "0.1"
+}

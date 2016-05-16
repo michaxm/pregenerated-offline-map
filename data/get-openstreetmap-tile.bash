@@ -22,7 +22,7 @@ if [ "$4" = "e" ] && [ -e "$LOC" ]; then
 fi
 
 mkdir -p ${Z}/${X}
-wget -nv http://b.tile.openstreetmap.org/${LOC} -O ${LOC}
+wget -nv http://a.tile.openstreetmap.org/${LOC} -O ${LOC}
 
 if [ "$4" = "d" ]; then
  display ${LOC}

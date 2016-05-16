@@ -49,7 +49,7 @@ function initData(mapSelection) {
             initMap(metadata, true, mapNames);
         });
     } else {
-        readMetadata("data/Hamburg/metadata.json", function(metadata){
+        readMetadata("data/"+mapSelection+"/metadata.json", function(metadata){
             initMap(metadata, false, mapNames);
         });
     }
